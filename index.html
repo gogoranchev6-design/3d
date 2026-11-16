@@ -1,224 +1,491 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="bg">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>3D Движение нагоре · Георги Ранчев</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sacred Matrix 3D · 10 Stages</title>
 <style>
-:root{--acc:#bd90ef;--spiral:#a8dbd0;--bg:#0c0814;--ink:#f6f0e4;--mute:#cfc6bb}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,sans-serif;overflow-x:hidden}
-#webgl-container{position:fixed;inset:0;z-index:1;pointer-events:none}
-#track{position:relative;height:700vh;z-index:2}
-#stage{position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:32px;pointer-events:none}
-.top, .panel-bottom, .center-box{pointer-events:auto}
-.top{display:flex;justify-content:space-between;align-items:flex-start}
-.eyebrow{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--spiral)}
-h1{font:400 clamp(1.8rem,4vw,3rem)/1.05 Georgia,serif;margin:.2em 0 0;letter-spacing:-.02em}
-h1 em{color:var(--acc);font-style:italic}
-.nav-links{display:flex;gap:8px;flex-wrap:wrap}
-.nav-links button{all:unset;cursor:pointer;font-size:.75rem;padding:6px 12px;border:1px solid #ffffff33;border-radius:99px;background:#180e23aa;backdrop-filter:blur(8px);color:var(--ink);transition:all .3s}
-.nav-links button:hover,.nav-links button[aria-pressed="true"]{border-color:var(--spiral);color:var(--spiral);background:#20302daa}
-.center-box{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
-.content-card{background:#0b0810d9;border:1px solid #ffffff1f;padding:28px 36px;border-radius:16px;backdrop-filter:blur(12px);max-width:640px;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
-.content-card h2{font:normal clamp(1.6rem,2.8vw,2.4rem)/1.1 Georgia,serif;color:#e9d8f6;margin:0 0 10px}
-.content-card p{font-size:.95rem;color:var(--mute);margin:0;line-height:1.6}
-.panel-bottom{position:absolute;bottom:24px;left:32px;right:32px;display:flex;justify-content:space-between;align-items:flex-end;background:#0b0810e6;border:1px solid #ffffff1f;padding:14px 20px;border-radius:12px;backdrop-filter:blur(10px);gap:15px;flex-wrap:wrap}
-.panel-info{font-size:.85rem;color:var(--mute);max-width:380px}
-.panel-info b{display:block;color:var(--acc);font-size:.9rem;margin-bottom:3px}
-.freq-selector{display:flex;gap:6px;align-items:center}
-.freq-btn{all:unset;cursor:pointer;font-size:.75rem;padding:6px 10px;border:1px solid var(--spiral);border-radius:6px;color:var(--spiral);background:#180e23;transition:all .3s}
-.freq-btn:hover,.freq-btn.active{background:var(--spiral);color:var(--bg)}
-.prog-bar{position:absolute;left:0;top:0;height:3px;background:linear-gradient(90deg,var(--spiral),var(--acc));width:0;z-index:20}
+:root{--bg:#04020a;--gold:#f5c862;--cyan:#00f5d4;--violet:#c77dff;--ink:#f9f6f0;--mute:#d0c4e8}
+*{box-sizing:border-box;user-select:none}
+html,body{margin:0;height:100%;background:radial-gradient(circle at center,#1b0b38 0%,var(--bg) 84%);color:var(--ink);font-family:Georgia,serif;overflow:hidden;cursor:pointer}
+#webgl{position:fixed;inset:0;z-index:1}
+.hud{position:relative;z-index:2;height:100vh;display:flex;flex-direction:column;justify-content:space-between;padding:18px 24px;pointer-events:none}
+.top-bar,.bottom-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;pointer-events:auto}
+.bottom-bar{align-items:flex-end}
+.eyebrow{font:600 10.5px/1.2 system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+h1{font-size:clamp(1.35rem,2.4vw,2.1rem);font-weight:400;margin:3px 0 0;letter-spacing:.08em;text-shadow:0 0 28px rgba(245,200,98,.5)}
+.nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;max-width:780px;justify-content:flex-end}
+.btn{all:unset;cursor:pointer;font:600 10.5px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;border:1px solid rgba(245,200,98,.38);border-radius:99px;background:rgba(12,6,26,.84);color:var(--ink);backdrop-filter:blur(8px);transition:.18s}
+.btn:hover,.btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);box-shadow:0 0 20px rgba(245,200,98,.7)}
+.btn-cyan{border-color:rgba(0,245,212,.45);color:var(--cyan)}
+.btn-cyan:hover,.btn-cyan.active{background:var(--cyan);color:var(--bg);border-color:var(--cyan);box-shadow:0 0 20px rgba(0,245,212,.7)}
+.btn-violet{border-color:rgba(199,125,255,.5);color:var(--violet)}
+.btn-violet:hover,.btn-violet.active{background:var(--violet);color:var(--bg);border-color:var(--violet);box-shadow:0 0 20px rgba(199,125,255,.7)}
+.info-card{background:rgba(10,5,24,.86);border:1px solid rgba(245,200,98,.32);padding:14px 18px;border-radius:14px;backdrop-filter:blur(10px);max-width:460px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.info-card b{display:block;font:600 12px/1.2 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.info-card p{font:400 13px/1.5 system-ui,sans-serif;color:var(--mute);margin:0 0 10px}
+.sliders{display:flex;gap:14px;font:600 10px/1 system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan)}
+.sliders label{display:flex;align-items:center;gap:6px}
+.sliders input{accent-color:var(--gold);cursor:pointer;width:85px}
+.right-controls{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-<div class="prog-bar" id="prog"></div>
-<div id="webgl-container"></div>
-<div id="track">
-  <div id="stage">
-    <header class="top">
-      <div>
-        <div class="eyebrow">Спиралата на Възнесението · 3D Сцена</div>
-        <h1>Движение <em>нагоре.</em></h1>
-      </div>
-      <nav class="nav-links" id="modeNav">
-        <button type="button" data-m="0" aria-pressed="true">01 · Коши</button>
-        <button type="button" data-m="1">02 · Елементи</button>
-        <button type="button" data-m="2">03 · Кръст и Фуния</button>
-        <button type="button" data-m="3">04 · Шестолъчна звезда</button>
-        <button type="button" data-m="4">05 · Вода и Звук</button>
-      </nav>
-    </header>
-    <div class="center-box">
-      <div class="content-card">
-        <h2 id="modelTitle">Кошите и Пулсиращите Обвивки</h2>
-        <p id="modelDesc">Физическите, енергийни и духовни слоеве не са изолирани. Те се преливат и дишат заедно в общ поток.</p>
+<div id="webgl"></div>
+<div class="hud">
+  <div class="top-bar">
+    <div>
+      <div class="eyebrow" id="tSub"></div>
+      <h1 id="tMain"></h1>
+    </div>
+    <div class="nav" id="stageNav">
+      <button class="btn" data-s="1" id="b1"></button>
+      <button class="btn" data-s="2" id="b2"></button>
+      <button class="btn" data-s="3" id="b3"></button>
+      <button class="btn" data-s="4" id="b4"></button>
+      <button class="btn" data-s="5" id="b5"></button>
+      <button class="btn" data-s="6" id="b6"></button>
+      <button class="btn active" data-s="7" id="b7"></button>
+      <button class="btn" data-s="8" id="b8"></button>
+      <button class="btn" data-s="9" id="b9"></button>
+      <button class="btn" data-s="10" id="b10"></button>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="info-card">
+      <b id="cTitle"></b>
+      <p id="cDesc"></p>
+      <div class="sliders">
+        <label><span id="lblSpd"></span><input type="range" id="rngSpd" min="0.1" max="3" step="0.1" value="1"></label>
+        <label><span id="lblAmp"></span><input type="range" id="rngAmp" min="0.2" max="3" step="0.1" value="1.2"></label>
       </div>
     </div>
-    <footer class="panel-bottom">
-      <div class="panel-info">
-        <b id="infoTitle">Спиралата на Възнесението</b>
-        <span id="infoText">Едновременна пулсация на фините полета.</span>
+    <div class="right-controls">
+      <div class="nav" id="freqNav">
+        <button class="btn btn-cyan" data-f="174">174 Hz</button>
+        <button class="btn btn-cyan" data-f="285">285 Hz</button>
+        <button class="btn btn-cyan" data-f="396">396 Hz</button>
+        <button class="btn btn-cyan" data-f="432">432 Hz</button>
+        <button class="btn btn-cyan active" data-f="528">528 Hz</button>
+        <button class="btn btn-cyan" data-f="639">639 Hz</button>
+        <button class="btn btn-cyan" data-f="963">963 Hz</button>
+        <button class="btn btn-cyan" id="sndBtn"></button>
       </div>
-      <div class="freq-selector">
-        <button type="button" class="freq-btn active" data-f="174">174 Hz</button>
-        <button type="button" class="freq-btn" data-f="285">285 Hz</button>
-        <button type="button" class="freq-btn" data-f="432">432 Hz</button>
-        <button type="button" id="audioToggle" class="freq-btn" style="border-color:var(--acc);color:var(--acc)">Пусни звук ♫</button>
+      <div class="nav">
+        <button class="btn btn-violet" id="autoBtn"></button>
+        <button class="btn active" data-c="gold" id="p1"></button>
+        <button class="btn" data-c="cyan" id="p2"></button>
+        <button class="btn" data-c="violet" id="p3"></button>
       </div>
-    </footer>
+    </div>
   </div>
 </div>
 <script>
-const models = [
-  {title: "Кошите и Пулсиращите Обвивки", desc: "Физическите, енергийни и духовни слоеве не са изолирани. Те се преливат и дишат заедно в общ поток.", info: "Телесни обвивки и фини полета", ref: "Динамична пулсация на много нива едновременно."},
-  {title: "Елементи и Сакрална Геометрия", desc: "Земята се стабилизира чрез квадрата, докато водата и огънят задават векторните посоки и чистотата на формата.", info: "Материя и базови форми", ref: "Символите и посоките изграждат физическата матрица."},
-  {title: "Кръст и Аксиална Фуния", desc: "Кръстът изразява вертикалния възход към духа, докато обратната фуния укротява и насочва низходящия поток на силата.", info: "Вектори на силата и духа", ref: "Баланс между възходящия и низходящия вектум."},
-  {title: "Шестолъчна Звезда (60°-60°-60°)", desc: "Преплетените триъгълници оформят матричния код. Ъглите от по 60° затварят геометрията на въглеродната основа (карбон С / 666).", info: "Карбонова матрица и код", ref: "Сакрална геометрия на материалното творение."},
-  {title: "Вода, Съзнание и Честотен Панел", desc: "Кристалната структура на водата резонира с намерението и чистите акустични херци за дълбока вътрешна хармонизация.", info: "Вибрация, звук и вода", ref: "Пълен резонанс между формата и вълната."}
-];
-const container = document.getElementById('webgl-container');
+const TXT = {
+  title: "\u0421\u043f\u0438\u0440\u0430\u043b\u0430\u0442\u0430 \u043d\u0430 \u0412\u044a\u0437\u043d\u0435\u0441\u0435\u043d\u0438\u0435\u0442\u043e \u00b7 10 \u0415\u0442\u0430\u043f\u0430",
+  sub: "\u0421\u0430\u043a\u0440\u0430\u043b\u043d\u0430 \u0413\u0435\u043e\u043c\u0435\u0442\u0440\u0438\u044f \u00b7 \u0413\u0435\u043e\u0440\u0433\u0438 \u0420\u0430\u043d\u0447\u0435\u0432",
+  main: "\u0421\u041f\u0418\u0420\u0410\u041b\u0410\u0422\u0410 \u041d\u0410 \u0416\u0418\u0412\u041e\u0422\u0410",
+  b1: "01\u00b7\u0421\u0435\u043c\u0435\u0442\u043e",
+  b2: "02\u00b7\u0426\u0432\u0435\u0442\u0435\u0442\u043e",
+  b3: "03\u00b7\u041c\u0435\u0442\u0430\u0442\u0440\u043e\u043d",
+  b4: "04\u00b7\u041c\u0435\u0440\u043a\u0430\u0431\u0430",
+  b5: "05\u00b7\u0415\u043b\u0435\u043c\u0435\u043d\u0442\u0438",
+  b6: "06\u00b7\u041a\u0443\u043d\u0434\u0430\u043b\u0438\u043d\u0438",
+  b7: "07\u00b7\u0422\u0440\u0438\u0442\u0435 \u0413\u0443\u043d\u0438",
+  b8: "08\u00b7\u041a\u0440\u044a\u0441\u0442 \u0438 \u0424\u0443\u043d\u0438\u044f",
+  b9: "09\u00b7\u0416\u0438\u0432\u0430 \u0412\u043e\u0434\u0430",
+  b10: "10\u00b7\u0425\u0438\u043f\u0435\u0440-\u0422\u043e\u0440\u043e\u0438\u0434",
+  sndOff: "\u0417\u0432\u0443\u043a \u266b",
+  sndOn: "\u0421\u043f\u0440\u0438 \u25a0",
+  auto: "\u0410\u0432\u0442\u043e-\u041f\u043e\u0442\u043e\u043a \u221e",
+  p1: "\u0417\u043b\u0430\u0442\u043e",
+  p2: "\u041f\u0440\u0430\u043d\u0430",
+  p3: "\u0415\u0442\u0435\u0440",
+  spd: "\u0421\u043a\u043e\u0440\u043e\u0441\u0442",
+  amp: "\u0412\u044a\u043b\u043d\u0430",
+  stages: {
+    1: {t: "01 \u00b7 \u0421\u0435\u043c\u0435\u0442\u043e \u043d\u0430 \u0416\u0438\u0432\u043e\u0442\u0430 (7 \u0421\u0444\u0435\u0440\u0438)", d: "\u0421\u0435\u0434\u0435\u043c\u0442\u0435 \u043f\u044a\u0440\u0432\u0438\u0447\u043d\u0438 \u0441\u0444\u0435\u0440\u0438 \u0438 \u0437\u0430\u043a\u043e\u043d\u044a\u0442 \u0437\u0430 \u043e\u043a\u0442\u0430\u0432\u0430\u0442\u0430."},
+    2: {t: "02 \u00b7 \u0426\u0432\u0435\u0442\u0435\u0442\u043e \u043d\u0430 \u0416\u0438\u0432\u043e\u0442\u0430 (19 \u0421\u0444\u0435\u0440\u0438)", d: "\u0425\u0430\u0440\u043c\u043e\u043d\u0438\u0447\u043d\u0430\u0442\u0430 \u0440\u0435\u0448\u0435\u0442\u043a\u0430 \u043e\u0442 19 \u043f\u0440\u0435\u043f\u043b\u0435\u0442\u0435\u043d\u0438 \u0441\u0444\u0435\u0440\u0438 \u0432 \u0434\u0432\u043e\u0435\u043d \u0437\u0430\u0449\u0438\u0442\u0435\u043d \u043f\u0440\u044a\u0441\u0442\u0435\u043d."},
+    3: {t: "03 \u00b7 \u041a\u0443\u0431\u044a\u0442 \u043d\u0430 \u041c\u0435\u0442\u0430\u0442\u0440\u043e\u043d (37 \u0421\u0444\u0435\u0440\u0438)", d: "13-\u0442\u0435 \u044f\u0434\u0440\u0430 \u043d\u0430 \u041f\u043b\u043e\u0434\u0430 \u043d\u0430 \u0416\u0438\u0432\u043e\u0442\u0430 \u0441\u0435 \u0441\u0432\u044a\u0440\u0437\u0432\u0430\u0442 \u0441\u044a\u0441 78 \u0441\u0438\u043b\u043e\u0432\u0438 \u0432\u0435\u043a\u0442\u043e\u0440\u0430."},
+    4: {t: "04 \u00b7 \u041c\u0435\u0440\u043a\u0430\u0431\u0430 \u00b7 \u0417\u0432\u0435\u0437\u0434\u0435\u043d \u0422\u0435\u0442\u0440\u0430\u0435\u0434\u044a\u0440", d: "\u0411\u0430\u043b\u0430\u043d\u0441 \u043c\u0435\u0436\u0434\u0443 \u0432\u044a\u0437\u0445\u043e\u0434\u044f\u0449\u0438\u044f \u0434\u0443\u0445\u043e\u0432\u0435\u043d \u0438 \u043d\u0438\u0437\u0445\u043e\u0434\u044f\u0449\u0438\u044f \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u0435\u043d \u043f\u043e\u0442\u043e\u043a (60\u00b0-60\u00b0-60\u00b0)."},
+    5: {t: "05 \u00b7 \u041f\u0435\u0442\u0442\u0435 \u0415\u043b\u0435\u043c\u0435\u043d\u0442\u0430 \u0438 \u041a\u043e\u0448\u0438\u0442\u0435", d: "\u041a\u043e\u043d\u0446\u0435\u043d\u0442\u0440\u0438\u0447\u043d\u0438 \u043e\u0431\u0432\u0438\u0432\u043a\u0438: \u0417\u0435\u043c\u044f (\u041a\u0443\u0431), \u041e\u0433\u044a\u043d (\u0422\u0435\u0442\u0440\u0430\u0435\u0434\u044a\u0440), \u0412\u044a\u0437\u0434\u0443\u0445 (\u041e\u043a\u0442\u0430\u0435\u0434\u044a\u0440), \u0412\u043e\u0434\u0430 (\u0418\u043a\u043e\u0441\u0430\u0435\u0434\u044a\u0440) \u0438 \u0415\u0442\u0435\u0440 (\u0414\u043e\u0434\u0435\u043a\u0430\u0435\u0434\u044a\u0440)."},
+    6: {t: "06 \u00b7 \u041a\u0443\u043d\u0434\u0430\u043b\u0438\u043d\u0438 \u0421\u043f\u0438\u0440\u0430\u043b\u0430 \u0438 7-\u0442\u0435 \u0427\u0430\u043a\u0440\u0438", d: "\u0426\u0435\u043d\u0442\u0440\u0430\u043b\u043d\u0438\u044f\u0442 \u043a\u0430\u043d\u0430\u043b \u0421\u0443\u0448\u0443\u043c\u043d\u0430 \u0441\u044a\u0441 7-\u0442\u0435 \u0435\u043d\u0435\u0440\u0433\u0438\u0439\u043d\u0438 \u044f\u0434\u0440\u0430 \u0438 \u0434\u0432\u043e\u0439\u043d\u0430\u0442\u0430 \u0441\u043f\u0438\u0440\u0430\u043b\u0430 \u043d\u0430 \u0418\u0434\u0430 \u0438 \u041f\u0438\u043d\u0433\u0430\u043b\u0430."},
+    7: {t: "07 \u00b7 \u0422\u0440\u0438\u0442\u0435 \u0413\u0443\u043d\u0438 \u00b7 \u0421\u0430\u0442\u0432\u0430, \u0420\u0430\u0434\u0436\u0430\u0441 \u0438 \u0422\u0430\u043c\u0430\u0441", d: "\u0422\u0440\u0438\u0442\u0435 \u0444\u0443\u043d\u0434\u0430\u043c\u0435\u043d\u0442\u0430\u043b\u043d\u0438 \u043a\u0430\u0447\u0435\u0441\u0442\u0432\u0430 \u043d\u0430 \u0435\u043d\u0435\u0440\u0433\u0438\u044f\u0442\u0430 (\u0438\u043d\u0435\u0440\u0446\u0438\u044f, \u0434\u0432\u0438\u0436\u0435\u043d\u0438\u0435 \u0438 \u0447\u0438\u0441\u0442\u0430 \u044f\u0441\u043d\u043e\u0442\u0430) \u0432 \u0442\u0440\u043e\u0435\u043d \u043e\u0440\u0431\u0438\u0442\u0430\u043b\u0435\u043d \u0432\u044a\u0437\u0435\u043b."},
+    8: {t: "08 \u00b7 \u041a\u0440\u044a\u0441\u0442\u044a\u0442 \u0438 \u0414\u0432\u043e\u0439\u043d\u0430\u0442\u0430 \u0410\u043a\u0441\u0438\u0430\u043b\u043d\u0430 \u0424\u0443\u043d\u0438\u044f", d: "\u0412\u0435\u0440\u0442\u0438\u043a\u0430\u043b\u043d\u0438\u044f\u0442 \u0432\u0435\u043a\u0442\u043e\u0440 \u043d\u0430 \u0434\u0443\u0445\u0430 \u0438 \u0445\u043e\u0440\u0438\u0437\u043e\u043d\u0442\u0430\u043b\u0430\u0442\u0430 \u043d\u0430 \u043c\u0430\u0442\u0435\u0440\u0438\u044f\u0442\u0430, \u043e\u0431\u0432\u0438\u0442\u0438 \u043e\u0442 \u0432\u0438\u0445\u0440\u043e\u0432\u0430\u0442\u0430 \u0444\u0443\u043d\u0438\u044f \u043d\u0430 \u0441\u0438\u043b\u0430\u0442\u0430."},
+    9: {t: "09 \u00b7 \u041a\u0440\u0438\u0441\u0442\u0430\u043b\u043d\u0430 \u0412\u043e\u0434\u0430 \u0438 \u041a\u0438\u043c\u0430\u0442\u0438\u0447\u0435\u043d \u0420\u0435\u0437\u043e\u043d\u0430\u043d\u0441", d: "\u0412\u043e\u0434\u043d\u0430\u0442\u0430 \u0433\u0435\u043e\u043c\u0435\u0442\u0440\u0438\u044f \u043f\u0440\u043e\u043c\u0435\u043d\u044f \u0441\u0432\u043e\u044f\u0442\u0430 \u043a\u0440\u0438\u0441\u0442\u0430\u043b\u043d\u0430 \u0440\u0435\u0448\u0435\u0442\u043a\u0430 \u0432 \u0440\u0435\u0430\u043b\u043d\u043e \u0432\u0440\u0435\u043c\u0435 \u0441\u043f\u043e\u0440\u0435\u0434 \u0438\u0437\u0431\u0440\u0430\u043d\u0430\u0442\u0430 \u0447\u0435\u0441\u0442\u043e\u0442\u0430 (Hz)."},
+    10: {t: "10 \u00b7 \u0425\u0438\u043f\u0435\u0440-\u0422\u043e\u0440\u043e\u0438\u0434 \u00b7 \u0415\u0434\u0438\u043d\u043d\u043e \u041f\u043e\u043b\u0435", d: "\u041f\u044a\u043b\u043d\u043e \u0442\u043e\u0440\u043e\u0438\u0434\u0430\u043b\u043d\u043e \u0440\u0430\u0437\u0433\u0440\u044a\u0449\u0430\u043d\u0435 \u043d\u0430 37-\u0442\u0435 \u0441\u0444\u0435\u0440\u0438 \u0438 \u0432\u044a\u043d\u0448\u043d\u0430\u0442\u0430 \u0442\u043e\u0440\u0441\u0438\u043e\u043d\u043d\u0430 \u043c\u0440\u0435\u0436\u0430."}
+  }
+};
+
+document.title = TXT.title;
+document.getElementById("tSub").textContent = TXT.sub;
+document.getElementById("tMain").textContent = TXT.main;
+for(let i=1;i<=10;i++) document.getElementById("b"+i).textContent = TXT["b"+i];
+document.getElementById("sndBtn").textContent = TXT.sndOff;
+document.getElementById("autoBtn").textContent = TXT.auto;
+document.getElementById("p1").textContent = TXT.p1;
+document.getElementById("p2").textContent = TXT.p2;
+document.getElementById("p3").textContent = TXT.p3;
+document.getElementById("lblSpd").textContent = TXT.spd;
+document.getElementById("lblAmp").textContent = TXT.amp;
+
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 7);
-const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true});
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-container.appendChild(renderer.domElement);
-scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-const pointLight = new THREE.PointLight(0xbd90ef, 2, 50);
-pointLight.position.set(5, 5, 5);
-scene.add(pointLight);
-const centralGroup = new THREE.Group();
-scene.add(centralGroup);
-const koshaGroup = new THREE.Group();
-[1.2, 2.0, 2.8].forEach((r, i) => {
-  const geo = new THREE.SphereGeometry(r, 32, 32);
-  const mat = new THREE.MeshBasicMaterial({color: i === 0 ? 0xa8dbd0 : i === 1 ? 0xbd90ef : 0xedbb99, wireframe: true, transparent: true, opacity: 0.35 - i * 0.08});
-  koshaGroup.add(new THREE.Mesh(geo, mat));
-});
-centralGroup.add(koshaGroup);
-const elemGroup = new THREE.Group();
-const earthBox = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshBasicMaterial({color: 0xedbb99, wireframe: true, transparent: true, opacity: 0.5}));
-const fireTetra = new THREE.Mesh(new THREE.TetrahedronGeometry(1.8), new THREE.MeshBasicMaterial({color: 0xbd90ef, wireframe: true, transparent: true, opacity: 0.6}));
-elemGroup.add(earthBox, fireTetra);
-elemGroup.visible = false;
-centralGroup.add(elemGroup);
-const crossGroup = new THREE.Group();
-const vertBar = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3, 16), new THREE.MeshStandardMaterial({color: 0xbd90ef}));
-const horizBar = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2, 16), new THREE.MeshStandardMaterial({color: 0xbd90ef}));
-horizBar.rotation.z = Math.PI / 2;
-const funnel = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2, 16, 1, true), new THREE.MeshBasicMaterial({color: 0xa8dbd0, wireframe: true, transparent: true, opacity: 0.4}));
-funnel.position.y = 1;
-crossGroup.add(vertBar, horizBar, funnel);
-crossGroup.visible = false;
-centralGroup.add(crossGroup);
-const starGroup = new THREE.Group();
-const starRing = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.04, 16, 100), new THREE.MeshBasicMaterial({color: 0xa8dbd0}));
-const innerStarBox = new THREE.Mesh(new THREE.OctahedronGeometry(1.5), new THREE.MeshBasicMaterial({color: 0xbd90ef, wireframe: true, transparent: true, opacity: 0.5}));
-starGroup.add(starRing, innerStarBox);
-starGroup.visible = false;
-centralGroup.add(starGroup);
-const waterGroup = new THREE.Group();
-const waterMat = new THREE.MeshStandardMaterial({color: 0xa8dbd0, wireframe: true, roughness: 0.2});
-waterGroup.add(new THREE.Mesh(new THREE.IcosahedronGeometry(1.8, 2), waterMat));
-waterGroup.visible = false;
-centralGroup.add(waterGroup);
-const groups = [koshaGroup, elemGroup, crossGroup, starGroup, waterGroup];
-function switchModel(idx) { groups.forEach((g, i) => { g.visible = (i === idx); }); }
-let currentMode = 0;
-const buttons = document.querySelectorAll('#modeNav button');
-function updateContent(idx) {
-  currentMode = idx;
-  buttons.forEach((btn, i) => btn.setAttribute('aria-pressed', i === idx));
-  document.getElementById('modelTitle').textContent = models[idx].title;
-  document.getElementById('modelDesc').textContent = models[idx].desc;
-  document.getElementById('infoTitle').textContent = models[idx].info;
-  document.getElementById('infoText').textContent = models[idx].ref;
-  switchModel(idx);
-}
-buttons.forEach((btn, idx) => {
-  btn.addEventListener('click', () => {
-    updateContent(idx);
-    window.scrollTo({top: (idx / models.length) * (document.getElementById('track').offsetHeight - window.innerHeight), behavior: 'smooth'});
-  });
-});
-window.addEventListener('scroll', () => {
-  const track = document.getElementById('track');
-  const prog = document.getElementById('prog');
-  const max = track.offsetHeight - window.innerHeight;
-  const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-  prog.style.width = (p * 100) + '%';
-  const idx = Math.min(models.length - 1, Math.floor(p * models.length));
-  if (idx !== currentMode) updateContent(idx);
-});
-let clock = new THREE.Clock();
-function animate() {
-  requestAnimationFrame(animate);
-  const elapsedTime = clock.getElapsedTime();
-  centralGroup.rotation.y = elapsedTime * 0.15;
-  centralGroup.rotation.x = Math.sin(elapsedTime * 0.1) * 0.1;
-  if (koshaGroup.visible) {
-    koshaGroup.children.forEach((mesh, i) => { mesh.scale.setScalar(1 + Math.sin(elapsedTime * 2 + i) * 0.05); });
-  }
-  if (waterGroup.visible) {
-    waterGroup.rotation.z = elapsedTime * 0.1;
-  }
-  renderer.render(scene, camera);
-}
-animate();
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-let audioCtx = null;
-let osc = null;
-let gainNode = null;
-let currentFreq = 174;
-let isPlaying = false;
-const freqButtons = document.querySelectorAll('.freq-btn[data-f]');
-freqButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    freqButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFreq = parseInt(btn.getAttribute('data-f'));
-    if (osc && audioCtx) {
-      osc.frequency.setValueAtTime(currentFreq, audioCtx.currentTime);
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 1000);
+let zoom = 12.4; camera.position.z = zoom;
+const renderer = new THREE.WebGLRenderer({alpha:true, antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.getElementById("webgl").appendChild(renderer.domElement);
+
+const root = new THREE.Group(); scene.add(root);
+const flower = new THREE.Group(); root.add(flower);
+
+const R = 1.05, s3 = Math.sqrt(3)/2, nodes = [], fruitCenters = [];
+const tGeo = new THREE.TorusGeometry(R, 0.022, 16, 84);
+const sGeo = new THREE.SphereGeometry(R, 20, 16);
+const coreDotGeo = new THREE.SphereGeometry(0.12, 12, 12);
+
+for(let q=-3;q<=3;q++){
+  for(let r=-3;r<=3;r++){
+    const s = -q-r;
+    const lvl = Math.max(Math.abs(q),Math.abs(r),Math.abs(s));
+    if(lvl<=3){
+      const x = R*(q + r*0.5), y = R*(r*s3);
+      const isFruit = (lvl===0) || (lvl===1) || (lvl===2 && (q===0 || r===0 || s===0));
+      const g = new THREE.Group(); g.position.set(x,y,0);
+      const tMesh = new THREE.Mesh(tGeo, new THREE.MeshBasicMaterial({color:0xf5c862,transparent:true,opacity:0.82}));
+      const sMesh = new THREE.Mesh(sGeo, new THREE.MeshBasicMaterial({color:0x00f5d4,wireframe:true,transparent:true,opacity:0.18}));
+      const dotMesh = new THREE.Mesh(coreDotGeo, new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.95}));
+      sMesh.visible = false; dotMesh.visible = false;
+      g.add(tMesh, sMesh, dotMesh); flower.add(g);
+      nodes.push({g, tMesh, sMesh, dotMesh, lvl, isFruit, dist:Math.hypot(x,y), ang:Math.atan2(y,x)});
+      if(isFruit) fruitCenters.push(new THREE.Vector3(x, y, 0));
     }
+  }
+}
+
+const metaPos = [];
+for(let i=0;i<fruitCenters.length;i++){
+  for(let j=i+1;j<fruitCenters.length;j++){
+    metaPos.push(fruitCenters[i].x, fruitCenters[i].y, 0, fruitCenters[j].x, fruitCenters[j].y, 0);
+  }
+}
+const metaGeo = new THREE.BufferGeometry();
+metaGeo.setAttribute("position", new THREE.Float32BufferAttribute(metaPos, 3));
+const metaMat = new THREE.LineBasicMaterial({color:0x00f5d4, transparent:true, opacity:0.65});
+const metatronLines = new THREE.LineSegments(metaGeo, metaMat);
+flower.add(metatronLines);
+
+const outer1 = new THREE.Mesh(new THREE.TorusGeometry(R*3.05, 0.032, 16, 128), new THREE.MeshBasicMaterial({color:0xf5c862,transparent:true,opacity:0.8}));
+const outer2 = new THREE.Mesh(new THREE.TorusGeometry(R*3.22, 0.016, 16, 128), new THREE.MeshBasicMaterial({color:0x00f5d4,transparent:true,opacity:0.5}));
+flower.add(outer1, outer2);
+
+const merkabaGroup = new THREE.Group();
+const tetraGeo = new THREE.TetrahedronGeometry(R*2.5, 0);
+const tetraUp = new THREE.Mesh(tetraGeo, new THREE.MeshBasicMaterial({color:0xf5c862, wireframe:true, transparent:true, opacity:0.92}));
+const tetraDown = new THREE.Mesh(tetraGeo, new THREE.MeshBasicMaterial({color:0x00f5d4, wireframe:true, transparent:true, opacity:0.92}));
+tetraUp.rotation.x = Math.atan(Math.sqrt(2));
+tetraDown.rotation.x = -Math.atan(Math.sqrt(2));
+tetraDown.rotation.z = Math.PI;
+merkabaGroup.add(tetraUp, tetraDown);
+root.add(merkabaGroup);
+
+const platonicGroup = new THREE.Group();
+const pSolids = [
+  new THREE.Mesh(new THREE.TetrahedronGeometry(0.95, 0), new THREE.MeshBasicMaterial({color:0xff595e, wireframe:true, transparent:true, opacity:0.9})),
+  new THREE.Mesh(new THREE.BoxGeometry(1.35, 1.35, 1.35), new THREE.MeshBasicMaterial({color:0xffca3a, wireframe:true, transparent:true, opacity:0.8})),
+  new THREE.Mesh(new THREE.OctahedronGeometry(1.9, 0), new THREE.MeshBasicMaterial({color:0x8ac926, wireframe:true, transparent:true, opacity:0.75})),
+  new THREE.Mesh(new THREE.IcosahedronGeometry(2.55, 0), new THREE.MeshBasicMaterial({color:0x00f5d4, wireframe:true, transparent:true, opacity:0.65})),
+  new THREE.Mesh(new THREE.DodecahedronGeometry(3.25, 0), new THREE.MeshBasicMaterial({color:0xc77dff, wireframe:true, transparent:true, opacity:0.55}))
+];
+pSolids.forEach(s => platonicGroup.add(s));
+root.add(platonicGroup);
+
+const spiralGroup = new THREE.Group();
+const chakraColors = [0xff2a55, 0xff7b00, 0xffd000, 0x00e676, 0x00e5ff, 0x651fff, 0xe040fb];
+const chakraNodes = [];
+for(let i=0;i<7;i++){
+  const y = (i - 3) * 1.1;
+  const cg = new THREE.Group(); cg.position.set(0, y, 0);
+  const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.32, 1), new THREE.MeshBasicMaterial({color:chakraColors[i], wireframe:true}));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.018, 12, 64), new THREE.MeshBasicMaterial({color:chakraColors[i], transparent:true, opacity:0.85}));
+  ring.rotation.x = Math.PI/2;
+  cg.add(core, ring); spiralGroup.add(cg);
+  chakraNodes.push({cg, core, ring});
+}
+const sPts1 = [], sPts2 = [];
+for(let i=0;i<=160;i++){
+  const t = i/160, ang = t * Math.PI * 6, y = (t - 0.5) * 7.2, rad = 0.85 + Math.sin(t*Math.PI)*0.35;
+  sPts1.push(new THREE.Vector3(Math.cos(ang)*rad, y, Math.sin(ang)*rad));
+  sPts2.push(new THREE.Vector3(Math.cos(ang+Math.PI)*rad, y, Math.sin(ang+Math.PI)*rad));
+}
+const helix1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(sPts1), new THREE.LineBasicMaterial({color:0xf5c862, transparent:true, opacity:0.85}));
+const helix2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(sPts2), new THREE.LineBasicMaterial({color:0x00f5d4, transparent:true, opacity:0.85}));
+const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 7.6, 16), new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.45}));
+spiralGroup.add(helix1, helix2, pillar);
+root.add(spiralGroup);
+
+const gunasGroup = new THREE.Group();
+const gunaColors = [0x00f5d4, 0xff4d6d, 0xf5c862];
+const gunaRings = [];
+for(let i=0;i<3;i++){
+  const gt = new THREE.Mesh(
+    new THREE.TorusKnotGeometry(1.9, 0.28, 140, 20, 2, 3),
+    new THREE.MeshBasicMaterial({color:gunaColors[i], wireframe:true, transparent:true, opacity:0.65})
+  );
+  gt.rotation.z = (i * Math.PI * 2) / 3;
+  gt.rotation.x = i * 0.6;
+  gunasGroup.add(gt);
+  gunaRings.push(gt);
+}
+const gunaCenter = new THREE.Mesh(new THREE.SphereGeometry(0.65, 24, 24), new THREE.MeshBasicMaterial({color:0xffffff, wireframe:true, transparent:true, opacity:0.8}));
+gunasGroup.add(gunaCenter);
+root.add(gunasGroup);
+
+const crossFunnelGroup = new THREE.Group();
+const cVert = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 6.8, 20), new THREE.MeshBasicMaterial({color:0xf5c862}));
+const cHoriz = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 4.4, 20), new THREE.MeshBasicMaterial({color:0xf5c862}));
+cHoriz.rotation.z = Math.PI/2; cHoriz.position.y = 0.6;
+const coneTop = new THREE.Mesh(new THREE.ConeGeometry(2.8, 3.4, 36, 8, true), new THREE.MeshBasicMaterial({color:0x00f5d4, wireframe:true, transparent:true, opacity:0.65}));
+coneTop.position.y = 1.7; coneTop.rotation.x = Math.PI;
+const coneBot = new THREE.Mesh(new THREE.ConeGeometry(2.8, 3.4, 36, 8, true), new THREE.MeshBasicMaterial({color:0xc77dff, wireframe:true, transparent:true, opacity:0.65}));
+coneBot.position.y = -1.7;
+crossFunnelGroup.add(cVert, cHoriz, coneTop, coneBot);
+root.add(crossFunnelGroup);
+
+const waterGroup = new THREE.Group();
+const waterGeo = new THREE.IcosahedronGeometry(2.7, 5);
+const waterOrig = waterGeo.attributes.position.array.slice();
+const waterMesh = new THREE.Mesh(waterGeo, new THREE.MeshBasicMaterial({color:0x00f5d4, wireframe:true, transparent:true, opacity:0.78}));
+const waterInner = new THREE.Mesh(new THREE.DodecahedronGeometry(1.4, 1), new THREE.MeshBasicMaterial({color:0xf5c862, wireframe:true, transparent:true, opacity:0.5}));
+waterGroup.add(waterMesh, waterInner);
+root.add(waterGroup);
+
+const hyperTorus = new THREE.Mesh(new THREE.TorusGeometry(3.3, 1.45, 28, 72), new THREE.MeshBasicMaterial({color:0xc77dff, wireframe:true, transparent:true, opacity:0.22}));
+root.add(hyperTorus);
+
+const shockMesh = new THREE.Mesh(new THREE.RingGeometry(0.8, 1.05, 64), new THREE.MeshBasicMaterial({color:0x00f5d4, side:THREE.DoubleSide, transparent:true, opacity:0}));
+root.add(shockMesh);
+
+const pCount = 1700, pArr = new Float32Array(pCount*3);
+for(let i=0;i<pCount*3;i+=3){
+  const rad = 2.5 + Math.random()*11, th = Math.random()*Math.PI*2;
+  pArr[i] = Math.cos(th)*rad; pArr[i+1] = Math.sin(th)*rad; pArr[i+2] = (Math.random()-0.5)*9;
+}
+const pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute("position", new THREE.BufferAttribute(pArr, 3));
+const pMat = new THREE.PointsMaterial({color:0xf5c862, size:0.042, transparent:true, opacity:0.65});
+const stars = new THREE.Points(pGeo, pMat);
+scene.add(stars);
+
+let stage = 7, pulse = 0, spinBoost = 0, mx = 0, my = 0, rx = 0.18, ry = -0.25, autoFlow = false;
+let speedMult = 1.0, waveAmp = 1.2, freq = 528;
+
+document.getElementById("rngSpd").oninput = e => { speedMult = +e.target.value; };
+document.getElementById("rngAmp").oninput = e => { waveAmp = +e.target.value; };
+
+function setStage(s){
+  stage = s;
+  document.querySelectorAll("#stageNav .btn").forEach(x => x.classList.toggle("active", +x.dataset.s === s));
+  document.getElementById("cTitle").textContent = TXT.stages[s].t;
+  document.getElementById("cDesc").textContent = TXT.stages[s].d;
+
+  flower.visible = (s<=4 || s===10);
+  const ringScale = s===1 ? 0.67 : s===2 ? 1 : 1.32;
+  outer1.scale.setScalar(ringScale); outer2.scale.setScalar(ringScale);
+  metatronLines.visible = (s===3 || s===4);
+  merkabaGroup.visible = (s===4);
+  platonicGroup.visible = (s===5);
+  spiralGroup.visible = (s===6);
+  gunasGroup.visible = (s===7);
+  crossFunnelGroup.visible = (s===8);
+  waterGroup.visible = (s===9);
+  hyperTorus.visible = (s===10);
+
+  nodes.forEach(n => {
+    n.g.visible = (s===1 ? n.lvl<=1 : s===2 ? n.lvl<=2 : true);
+    n.sMesh.visible = (s>=3);
+    n.dotMesh.visible = (s===3 && n.isFruit);
+    n.tMesh.material.opacity = (s===4 ? 0.28 : 0.82);
   });
+
+  shockMesh.scale.setScalar(0.5);
+  shockMesh.material.opacity = 0.95;
+}
+setStage(7);
+
+document.querySelectorAll("#stageNav .btn").forEach(b => b.onclick = e => {
+  e.stopPropagation(); setStage(+b.dataset.s); pulse = 2.4; spinBoost = 1.6;
 });
-document.getElementById('audioToggle').addEventListener('click', async () => {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+document.getElementById("autoBtn").onclick = e => {
+  e.stopPropagation();
+  autoFlow = !autoFlow;
+  e.target.classList.toggle("active", autoFlow);
+};
+
+const palettes = {
+  gold: {main:0xf5c862, sec:0x00f5d4},
+  cyan: {main:0x00f5d4, sec:0xf5c862},
+  violet: {main:0xc77dff, sec:0x00f5d4}
+};
+document.querySelectorAll(".btn[data-c]").forEach(b => b.onclick = e => {
+  e.stopPropagation();
+  document.querySelectorAll(".btn[data-c]").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  const pal = palettes[b.dataset.c];
+  nodes.forEach(n => { n.tMesh.material.color.setHex(pal.main); n.sMesh.material.color.setHex(pal.sec); });
+  outer1.material.color.setHex(pal.main); outer2.material.color.setHex(pal.sec);
+  metaMat.color.setHex(pal.sec); tetraUp.material.color.setHex(pal.main); tetraDown.material.color.setHex(pal.sec);
+  pMat.color.setHex(pal.main); shockMesh.material.color.setHex(pal.sec);
+  waterMesh.material.color.setHex(pal.sec); hyperTorus.material.color.setHex(pal.main);
+  pulse = 1.9;
+});
+
+window.onmousemove = e => { mx = (e.clientX/innerWidth - 0.5)*2.5; my = (e.clientY/innerHeight - 0.5)*2.5; };
+window.onwheel = e => { zoom = Math.min(20, Math.max(4.5, zoom + e.deltaY*0.005)); };
+window.onpointerdown = e => {
+  if(e.target.tagName === "BUTTON" || e.target.tagName === "INPUT" || e.target.closest(".info-card")) return;
+  setStage((stage % 10) + 1);
+  pulse = 2.8; spinBoost = 2.2;
+};
+window.onresize = () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); };
+
+let actx = null, osc1 = null, osc2 = null, playing = false;
+const sndBtn = document.getElementById("sndBtn");
+
+document.querySelectorAll(".btn[data-f]").forEach(b => b.onclick = e => {
+  e.stopPropagation();
+  document.querySelectorAll(".btn[data-f]").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  freq = +b.dataset.f;
+  if(playing && osc1 && actx){
+    osc1.frequency.setValueAtTime(freq, actx.currentTime);
+    osc2.frequency.setValueAtTime(freq*1.5, actx.currentTime);
   }
-  if (audioCtx.state === 'suspended') {
-    await audioCtx.resume();
-  }
-  if (!isPlaying) {
-    osc = audioCtx.createOscillator();
-    gainNode = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(currentFreq, audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(0.03, audioCtx.currentTime);
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    osc.start();
-    isPlaying = true;
-    document.getElementById('audioToggle').textContent = 'Спри звук ■';
-    document.getElementById('audioToggle').style.background = 'var(--spiral)';
-    document.getElementById('audioToggle').style.color = 'var(--bg)';
+  pulse = 1.8;
+});
+
+sndBtn.onclick = async e => {
+  e.stopPropagation();
+  if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==="suspended") await actx.resume();
+  if(!playing){
+    osc1 = actx.createOscillator(); osc2 = actx.createOscillator();
+    const g = actx.createGain();
+    osc1.type = "sine"; osc2.type = "sine";
+    osc1.frequency.value = freq; osc2.frequency.value = freq*1.5;
+    g.gain.value = 0.035;
+    osc1.connect(g); osc2.connect(g); g.connect(actx.destination);
+    osc1.start(); osc2.start();
+    playing = true; sndBtn.classList.add("active"); sndBtn.textContent = TXT.sndOn;
   } else {
-    osc.stop();
-    osc.disconnect();
-    isPlaying = false;
-    document.getElementById('audioToggle').textContent = 'Пусни звук ♫';
-    document.getElementById('audioToggle').style.background = '#180e23';
-    document.getElementById('audioToggle').style.color = 'var(--acc)';
+    osc1.stop(); osc2.stop();
+    playing = false; sndBtn.classList.remove("active"); sndBtn.textContent = TXT.sndOff;
   }
-});
+};
+
+const clock = new THREE.Clock();
+let lastAuto = 0, t = 0;
+(function anim(){
+  requestAnimationFrame(anim);
+  const dt = clock.getDelta();
+  t += dt * speedMult;
+
+  if(autoFlow && clock.getElapsedTime() - lastAuto > 4.2){
+    lastAuto = clock.getElapsedTime();
+    setStage((stage % 10) + 1);
+    pulse = 2.2; spinBoost = 1.5;
+  }
+
+  rx += (my - rx)*0.06; ry += (mx - ry)*0.06;
+  pulse *= 0.92; spinBoost *= 0.94;
+  camera.position.z += (zoom - camera.position.z)*0.08;
+  root.rotation.set(rx, ry + spinBoost*0.8, 0);
+  flower.rotation.z += 0.0025*speedMult + spinBoost*0.035;
+  stars.rotation.z = -t*0.03;
+
+  if(shockMesh.material.opacity > 0.01){
+    shockMesh.scale.addScalar(0.38);
+    shockMesh.material.opacity *= 0.88;
+  }
+
+  if(merkabaGroup.visible){
+    tetraUp.rotation.z = t*0.75;
+    tetraDown.rotation.z = -t*0.75;
+    merkabaGroup.scale.setScalar(1 + Math.sin(t*2.5)*0.06*waveAmp + pulse*0.16);
+  }
+
+  if(platonicGroup.visible){
+    pSolids.forEach((s, idx) => {
+      const dir = idx % 2 === 0 ? 1 : -1;
+      s.rotation.x = t * 0.45 * dir;
+      s.rotation.y = t * 0.6 * dir;
+      s.scale.setScalar(1 + Math.sin(t*2.2 - idx*0.5)*0.07*waveAmp + pulse*0.14);
+    });
+  }
+
+  if(spiralGroup.visible){
+    helix1.rotation.y = t*0.95;
+    helix2.rotation.y = t*0.95;
+    chakraNodes.forEach((cn, idx) => {
+      cn.core.rotation.y = -t*1.4;
+      cn.core.rotation.x = t*0.8;
+      cn.cg.scale.setScalar(1 + Math.sin(t*3 - idx*0.6)*0.18*waveAmp + pulse*0.2);
+    });
+  }
+
+  if(gunasGroup.visible){
+    gunaRings.forEach((gr, i) => {
+      const dir = i===1 ? -1.2 : 0.8;
+      gr.rotation.x += 0.012 * dir * speedMult;
+      gr.rotation.y += 0.015 * (i+1) * 0.5 * speedMult;
+      gr.scale.setScalar(1 + Math.sin(t*2 + i)*0.08*waveAmp + pulse*0.15);
+    });
+    gunaCenter.scale.setScalar(1 + Math.sin(t*4)*0.15*waveAmp);
+  }
+
+  if(crossFunnelGroup.visible){
+    coneTop.rotation.y = t*1.2;
+    coneBot.rotation.y = -t*1.2;
+    const fScale = 1 + Math.sin(t*2.8)*0.1*waveAmp + pulse*0.18;
+    coneTop.scale.set(fScale, 1, fScale);
+    coneBot.scale.set(fScale, 1, fScale);
+  }
+
+  if(waterGroup.visible){
+    const pos = waterGeo.attributes.position.array;
+    const k = (freq / 120);
+    for(let i=0;i<pos.length;i+=3){
+      const ox = waterOrig[i], oy = waterOrig[i+1], oz = waterOrig[i+2];
+      const disp = 1 + 0.14 * waveAmp * Math.sin(ox*k + t*3) * Math.cos(oy*k - t*2.5) * Math.sin(oz*k + t*2);
+      pos[i] = ox * disp; pos[i+1] = oy * disp; pos[i+2] = oz * disp;
+    }
+    waterGeo.attributes.position.needsUpdate = true;
+    waterMesh.rotation.y = t*0.35;
+    waterInner.rotation.x = -t*0.6;
+  }
+
+  if(hyperTorus.visible){
+    hyperTorus.rotation.x = t*0.35;
+    hyperTorus.rotation.y = -t*0.25;
+    hyperTorus.scale.setScalar(1 + Math.sin(t*1.8)*0.08*waveAmp);
+  }
+
+  if(flower.visible){
+    nodes.forEach(n => {
+      if(!n.g.visible) return;
+      const w = Math.sin(t*2.4 - n.dist*0.9) * waveAmp;
+      n.g.position.z = stage===10 ? w*1.2 : w*(0.18 + pulse*0.55);
+      n.g.scale.setScalar(1 + pulse*0.16);
+      n.tMesh.rotation.x = stage===10 ? t*0.8 + n.ang : pulse*0.4;
+      n.tMesh.rotation.y = stage===10 ? t*0.6 + n.lvl*0.5 : pulse*0.4;
+    });
+  }
+
+  renderer.render(scene, camera);
+})();
 </script>
 </body>
 </html>
